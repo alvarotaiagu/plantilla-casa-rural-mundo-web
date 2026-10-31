@@ -16,7 +16,7 @@ import { css } from './luz.js';
 
 const suave = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
-export async function crearMundo({ contenedor, movil, version, base = 'img/terreno/', inicial = {} }) {
+export async function crearMundo({ contenedor, movil, ligera = false, version, base = 'img/terreno/', inicial = {} }) {
   const lienzo = document.createElement('canvas');
   lienzo.className = 'mundo-lienzo';
   lienzo.setAttribute('aria-hidden', 'true');
@@ -41,7 +41,7 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   const cielo = crearCielo(THREE, { escena, renderer, movil });
   const casa = crearCasa(THREE, { alturaEn, movil });
   escena.add(casa.grupo);
-  const entorno = crearEntorno(THREE, { meta, alturaEn, movil, vidParra: casa.mallas.vid });
+  const entorno = crearEntorno(THREE, { meta, alturaEn, movil, ligera, vidParra: casa.mallas.vid });
   escena.add(entorno.grupo);
 
   // ---------- el riel ----------
@@ -199,7 +199,8 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   });
   addEventListener('corga:densidad', e => { sobria = e.detail.sobria; pedir(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pedir(); });
-  if (matchMedia('(pointer: fine)').matches) {
+  // en ?ligera no: redibuja todo el valle a cada movimiento y el cursor va al ritmo del 3D
+  if (!ligera && matchMedia('(pointer: fine)').matches) {
     addEventListener('pointermove', e => { if (explorando) return; puntero.x = e.clientX / innerWidth * 2 - 1; puntero.y = -(e.clientY / innerHeight * 2 - 1); pedir(); }, { passive: true });
   }
 

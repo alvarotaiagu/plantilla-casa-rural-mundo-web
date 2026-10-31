@@ -46,10 +46,10 @@ function texturaCamino(THREE) {
   return t;
 }
 
-function copaGeo(THREE, semilla) {
+function copaGeo(THREE, semilla, detalle) {
   const r = azar(semilla), partes = [];
   for (const [x, y, z, s] of [[0, 0, 0, 1], [.7, -.25, .2, .72], [-.6, -.15, -.3, .78], [.1, .45, -.5, .66]]) {
-    const g = new THREE.IcosahedronGeometry(s, 1);
+    const g = new THREE.IcosahedronGeometry(s, detalle);
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { const k = 1 + (r() - .5) * .28; p.setXYZ(i, p.getX(i) * k + x, p.getY(i) * k * .86 + y, p.getZ(i) * k + z); }
     partes.push(g.index ? g.toNonIndexed() : g);
@@ -62,7 +62,7 @@ function copaGeo(THREE, semilla) {
   return g;
 }
 
-export function crearEntorno(THREE, { meta, alturaEn, movil, vidParra }) {
+export function crearEntorno(THREE, { meta, alturaEn, movil, ligera, vidParra }) {
   const grupo = new THREE.Group();
   const r = azar(77);
   const uCopa = { value: 1 }, uCepa = { value: 1 };
@@ -78,7 +78,7 @@ export function crearEntorno(THREE, { meta, alturaEn, movil, vidParra }) {
   // ---------- árboles ----------
   const lista = movil ? meta.arboles.filter((_, i) => i % 2 === 0) : meta.arboles;
   const nA = lista.length;
-  const copa = new THREE.InstancedMesh(copaGeo(THREE, 5), encoger(new THREE.MeshStandardMaterial({ roughness: .95, flatShading: true }), uCopa), nA);
+  const copa = new THREE.InstancedMesh(copaGeo(THREE, 5, 1), encoger(new THREE.MeshStandardMaterial({ roughness: .95, flatShading: true }), uCopa), nA);
   const tronco = new THREE.InstancedMesh(new THREE.CylinderGeometry(.12, .2, 1, 6).translate(0, .5, 0), new THREE.MeshStandardMaterial({ color: 0x4a3a2c, roughness: 1 }), nA);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color();
   const azarA = lista.map(() => [r(), r(), r()]);
@@ -100,6 +100,15 @@ export function crearEntorno(THREE, { meta, alturaEn, movil, vidParra }) {
     sombra.castShadow = true;
     sombra.layers.set(1);
     grupo.add(sombra);
+  }
+  // en ?ligera, los del valle con copa sencilla (4 veces menos triángulos); los de cerca siguen redondos
+  let redonda = null;
+  if (ligera) {
+    redonda = new THREE.InstancedMesh(copa.geometry, copa.material, cerca.length);
+    copa.geometry = copaGeo(THREE, 5, 0);
+    cerca.forEach((i, j) => { copa.getMatrixAt(i, m4); redonda.setMatrixAt(j, m4); m4.makeScale(0, 0, 0); copa.setMatrixAt(i, m4); });
+    redonda.receiveShadow = true;
+    grupo.add(redonda);
   }
 
   // ---------- bancales: muros y cepas ----------
@@ -183,6 +192,7 @@ export function crearEntorno(THREE, { meta, alturaEn, movil, vidParra }) {
   }
   function estacion(est) {
     pintar(copa, nA, COPA, i => azarA[i], est);
+    if (redonda) pintar(redonda, cerca.length, COPA, j => azarA[cerca[j]], est);
     pintar(cepa, nC, CEPA, i => [azarC[i][0], azarC[i][1], (azarC[i][0] * 7.3) % 1], est);
     if (vidParra) pintar(vidParra, vidParra.count, CEPA, i => [((i * .618) % 1), ((i * .311) % 1), ((i * .743) % 1)], est);
     uCopa.value = est === 'invierno' ? .62 : 1;
