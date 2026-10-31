@@ -9,7 +9,7 @@
 import { iniciarPlanB } from './planb.js';
 import { rotulo, diaDe, horasDe, hhmm, ESTACION_HOY } from './sol.js';
 
-const VERSION = '3';
+const VERSION = '4';
 const raiz = document.documentElement;
 const mundo = document.getElementById('mundo');
 

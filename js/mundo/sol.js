@@ -99,7 +99,7 @@ export function horasDe(dia) {
     Amanecer, mañana, mediodía, tarde, puesta y noche, con las horas reales de ese día. */
 export function minutoDe(s, dia) {
   const { sale, pone } = horasDe(dia), luz = pone - sale;
-  const K = [sale - 42, sale + 28, sale + luz * .24, sale + luz * .47, sale + luz * .74, pone - 4, pone + 115];
+  const K = [sale - 14, sale + 40, sale + luz * .24, sale + luz * .47, sale + luz * .74, pone - 4, pone + 115];
   if (s <= 0) return K[0];
   if (s >= 6) return K[6];
   const i = Math.floor(s), f = s - i;

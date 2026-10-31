@@ -9,8 +9,8 @@ const hex = h => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16)
 // sol: color de la luz directa; i: su intensidad; hc/hs/hi: luz de cielo, del suelo y su intensidad;
 // noche: estrellas y ventanas (0–1); exp: exposición.
 const TABLA = [
-  { alt: -18, cen: '#03060e', hor: '#0b1427', brillo: '#0b1427', sol: '#8ea4d6', i: 0, hc: '#1c2b4c', hs: '#050608', hi: .32, noche: 1, exp: 1.05 },
-  { alt: -9, cen: '#0b1430', hor: '#283456', brillo: '#7d4a63', sol: '#8ea4d6', i: 0, hc: '#33416c', hs: '#0a0b10', hi: .42, noche: .85, exp: 1.0 },
+  { alt: -18, cen: '#03060e', hor: '#0b1427', brillo: '#0b1427', sol: '#8ea4d6', i: 0, hc: '#2a3c66', hs: '#07080b', hi: .55, noche: 1, exp: 1.05 },
+  { alt: -9, cen: '#0b1430', hor: '#283456', brillo: '#7d4a63', sol: '#8ea4d6', i: 0, hc: '#3b4a7a', hs: '#0c0d12', hi: .6, noche: .85, exp: 1.0 },
   { alt: -3, cen: '#1e2e5a', hor: '#7a6280', brillo: '#e98a5c', sol: '#ff8f5e', i: .25, hc: '#6372a2', hs: '#1a1512', hi: .6, noche: .4, exp: .95 },
   { alt: 2, cen: '#3a5a90', hor: '#eaa679', brillo: '#ffb36a', sol: '#ffa463', i: 1.4, hc: '#91a7c9', hs: '#3a2e22', hi: .75, noche: .04, exp: .9 },
   { alt: 8, cen: '#4772ad', hor: '#ead5bc', brillo: '#ffd59f', sol: '#ffd19c', i: 2.3, hc: '#a9bfd9', hs: '#4a3f30', hi: .9, noche: 0, exp: .85 },

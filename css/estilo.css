@@ -153,6 +153,7 @@ html.ficticio [data-dato="direccion"]::after, html.ficticio .precio-ficticio::af
   background: linear-gradient(#1e2e5a, var(--cielo-hor) 70%, #2b2a24);
 }
 .plan-b, .plan-b svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.plan-b { pointer-events: none; }   /* encima del lienzo: no puede quedarse con los arrastres de «Explorar» */
 .mundo-lienzo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.1s ease; }
 .mundo.con-3d .mundo-lienzo { opacity: 1; }
 .mundo.con-3d .plan-b { opacity: 0; transition: opacity 1.1s ease 1s; }

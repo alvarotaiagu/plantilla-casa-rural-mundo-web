@@ -243,7 +243,7 @@ for k, (x, z) in enumerate(puntos):
     if k >= n - 3:   # al final del río ya se mira a la ladera de la casa
         m, mh = (cx, cz), COTA + 30
     else:
-        m = puntos[min(n - 1, k + 3)]; mh = suelo(*m) + 60
+        m = puntos[min(n - 1, k + 3)]; mh = max(suelo(*m) + 60, h - 150)
     rail.append({'p': [x, h, z], 'm': [m[0], mh, m[1]], 'parada': 0 if k == 0 else None})
 # subida a la casa desde el río (la casa queda al norte)
 def rel(dx, dz, alto_sobre, mx=0, mz=0, mh=4.0, parada=None, mirar=None):
