@@ -1,0 +1,10 @@
+{
+  "name": "Casa da Corga · Ribeira Sacra (demostración)",
+  "short_name": "Casa da Corga",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#10151a",
+  "theme_color": "#14181c",
+  "lang": "es",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

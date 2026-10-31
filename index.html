@@ -1,0 +1,405 @@
+<!doctype html>
+<!--
+  SITIO DE DEMOSTRACIÓN. «Casa da Corga» es un negocio ficticio: los datos,
+  las fotografías de las estancias y la historia son de muestra.
+  Plantilla «Cámara sobre raíl»: el scroll recorre un mundo 3D continuo
+  (relieve y ortofoto del IGN, CC BY 4.0). Ver README.md.
+-->
+<html lang="es" class="sin-js">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Casa da Corga · casa de piedra en la Ribeira Sacra</title>
+<meta name="description" content="Casa de piedra entre las viñas del cañón del Sil, en Sober (Ribeira Sacra). Se alquila entera, para ocho. Sitio de demostración: negocio ficticio.">
+<meta name="theme-color" content="#14181c">
+<meta property="og:title" content="Casa da Corga · Ribeira Sacra">
+<meta property="og:description" content="Una casa de piedra entre las viñas de la orilla norte del Sil. Sitio de demostración.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="css/estilo.css?v=1">
+<script>
+  /* Bloqueante y corto: estado antes del primer pintado. */
+  (function () {
+    var h = document.documentElement, q = new URLSearchParams(location.search);
+    h.classList.remove('sin-js'); h.classList.add('js');
+    // recargar a media página con el mundo fijo: siempre desde arriba (salvo #ancla)
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (!location.hash) window.scrollTo(0, 0);
+    // la cortina, una vez por sesión
+    try { if (sessionStorage.getItem('corga-cortina')) h.classList.add('sin-cortina'); } catch (e) {}
+    // MANDO DE MAQUETA (no viaja al cliente): densidad y paleta, solo con ?revision
+    if (q.has('revision')) {
+      h.classList.add('revision');
+      try {
+        if (localStorage.getItem('corga-densidad') === 'sobria') h.classList.add('sobria');
+        var p = localStorage.getItem('corga-paleta'); if (p && p !== 'mencia') h.classList.add('paleta-' + p);
+      } catch (e) {}
+    }
+    // /MANDO DE MAQUETA
+    // red de seguridad de la cortina: si main.js no llega, se quita igual
+    window.__cortinaRed = setTimeout(function () { h.classList.add('cortina-fuera'); }, 7000);
+  })();
+</script>
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+
+<!-- ============ CORTINA: el Sil se dibuja y lleva hasta la casa ============ -->
+<div class="cortina" id="cortina" aria-hidden="true">
+  <div class="cortina-dentro">
+    <svg class="cortina-mapa" viewBox="0 0 1000 675" focusable="false">
+      <path class="cortina-rio" pathLength="1" d="M3 144 L16 153 L32 164 L48 175 L61 187 L70 203 L76 220 L77 237 L79 254 L82 271 L86 288 L100 305 L114 316 L123 327 L126 344 L129 361 L138 378 L152 387 L168 391 L185 388 L201 380 L218 371 L235 363 L251 356 L268 346 L282 335 L292 318 L301 301 L310 284 L319 273 L332 262 L349 254 L365 249 L382 242 L399 232 L415 220 L432 211 L449 204 L465 202 L482 205 L499 213 L515 224 L529 235 L539 247 L550 263 L562 280 L571 292 L582 303 L595 314 L606 325 L617 337 L629 348 L642 359 L657 370 L674 381 L690 387 L707 390 L724 391 L740 393 L757 393 L772 392 L784 390"/>
+      <g class="cortina-casa" transform="translate(776 350)">
+        <path pathLength="1" d="M-16 6 V-8 L0 -20 L16 -8 V6 Z M7 -14 V-21 H11 V-11"/>
+      </g>
+    </svg>
+    <p class="cortina-nombre"><span>Casa</span> <span>da</span> <span>Corga</span></p>
+    <p class="cortina-pie">Ribeira Sacra · cañón del Sil</p>
+  </div>
+  <svg class="cortina-borde" viewBox="0 0 100 10" preserveAspectRatio="none" focusable="false"><path d="M0 0 H100 V0 Q50 10 0 0 Z"/></svg>
+</div>
+
+<!-- ============ CABECERA ============ -->
+<header class="cabecera" id="cabecera">
+  <a class="marca" href="#llegada" aria-label="Casa da Corga, al principio">
+    <svg class="marca-signo" viewBox="0 0 40 40" width="34" height="34" aria-hidden="true" focusable="false">
+      <path d="M8 22 L20 11 L32 22 M11 20 V30 H29 V20 M25 15 V10 H28 V17" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M4 35 C 12 31, 18 38, 26 34 S 36 32, 38 34" fill="none" stroke="var(--acento-claro)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="marca-nombre" data-dato="nombre">Casa da Corga</span>
+  </a>
+  <button class="menu-boton" id="menu-boton" aria-expanded="false" aria-controls="menu"><span class="menu-raya"></span><span class="visual-oculto">Menú</span></button>
+  <nav class="menu" id="menu" aria-label="Paradas del recorrido">
+    <ol>
+      <li><a href="#casa" data-ir="casa"><span class="menu-num">02</span> La casa</a></li>
+      <li><a href="#estancias" data-ir="estancias"><span class="menu-num">03</span> Estancias</a></li>
+      <li><a href="#entorno" data-ir="entorno"><span class="menu-num">04</span> Entorno</a></li>
+      <li><a href="#servicios" data-ir="servicios"><span class="menu-num">05</span> Servicios</a></li>
+      <li class="menu-reservar"><a href="#reservar" data-ir="reservar" class="boton boton--acento">Reservar</a></li>
+    </ol>
+  </nav>
+</header>
+
+<!-- ============ EL MUNDO (fijo detrás de todo) ============ -->
+<div class="mundo" id="mundo">
+  <div class="plan-b" id="plan-b"></div>
+  <div class="mundo-velo" aria-hidden="true"></div>
+</div>
+
+<!-- la hora del recorrido: el sol y la luna de verdad, de hoy -->
+<p class="hora" id="hora" aria-hidden="true"><span class="hora-dia"></span><span class="hora-hora"></span><span class="hora-cielo"></span></p>
+
+<!-- exploración libre: solo tras el botón (en el móvil no roba el scroll) -->
+<div class="explorar" id="explorar" hidden>
+  <button class="boton boton--claro explorar-abrir" id="explorar-abrir" type="button">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 3 a9 9 0 1 0 0.01 0 M3 12 h18 M12 3 c-3 3 -3 15 0 18 c3 -3 3 -15 0 -18" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+    Explorar el valle
+  </button>
+  <div class="explorar-barra" id="explorar-barra" hidden>
+    <p>Arrastra para girar · pellizca o usa la rueda para acercarte</p>
+    <button class="boton boton--acento" id="explorar-cerrar" type="button">Volver al recorrido</button>
+  </div>
+</div>
+
+<main id="contenido">
+
+  <!-- ============ 01 · LLEGADA ============ -->
+  <section class="parada parada--llegada" id="llegada" aria-labelledby="llegada-tit">
+    <i class="punto" data-parada="0" aria-hidden="true"></i>
+    <div class="llegada-entrada">
+      <p class="antetitulo"><span data-dato="lugar">Sober · Ribeira Sacra</span> · cañón del Sil</p>
+      <h1 class="titular titular--enorme" id="llegada-tit" data-partir><span data-dato="nombre">Casa da Corga</span></h1>
+      <p class="entradilla">Una casa de piedra entre las viñas de la orilla norte del Sil. Para ocho, entera. Se llega por el río.</p>
+      <p class="bajar" aria-hidden="true"><span class="bajar-linea"></span>Baja para llegar</p>
+    </div>
+    <div class="llegada-vuelo">
+      <p class="rotulo-vuelo">El Sil corre encajado entre paredes de cuatrocientos metros.</p>
+      <p class="rotulo-vuelo">En la orilla que mira al sol, los bancales de viña. Ahí está la casa.</p>
+    </div>
+    <div class="llegada-frase bloque-texto">
+      <i class="punto" data-parada="1" aria-hidden="true"></i>
+      <p class="antetitulo"><span class="num">01</span> Llegada</p>
+      <h2 class="titular" data-partir>La pista se acaba donde empiezan las viñas.</h2>
+      <p>Se llega en coche hasta el portal, por la pista de los bancales. Desde el patio se ve el río abajo y la otra orilla enfrente.</p>
+    </div>
+  </section>
+
+  <!-- ============ 02 · LA CASA ============ -->
+  <section class="parada parada--casa" id="casa" aria-labelledby="casa-tit">
+    <div class="pegado">
+      <div class="bloque-texto">
+        <i class="punto" data-parada="2" data-en=".62" aria-hidden="true"></i>
+        <p class="antetitulo"><span class="num">02</span> La casa <span class="marca-ejemplo">historia de ejemplo</span></p>
+        <h2 class="titular" id="casa-tit" data-partir>Piedra a piedra, como se hizo en <span data-dato="anio">1887</span>.</h2>
+        <p>La levantó una familia de viticultores con la piedra que salía al abrir los bancales: lousa parda para los muros, granito para las esquinas y los dinteles, pizarra para el tejado. Abajo, la bodega; arriba, la vivienda y el corredor de madera, al sol del mediodía.</p>
+        <p>Se restauró sin mover una piedra de sitio. Los muros miden sesenta centímetros: guardan el fresco en agosto y el calor de la lareira en enero.</p>
+        <dl class="cifras-linea">
+          <div><dt>Año</dt><dd data-dato="anio">1887</dd></div>
+          <div><dt>Superficie</dt><dd><span data-dato="superficie">240</span> m²</dd></div>
+          <div><dt>Dormitorios</dt><dd data-dato="dormitorios">4</dd></div>
+          <div><dt>Plazas</dt><dd data-dato="plazas">8</dd></div>
+        </dl>
+        <div class="casa-fachada" data-fachada hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · LAS ESTANCIAS (sin 3D: fotos de ejemplo) ============ -->
+  <section class="parada parada--estancias hoja" id="estancias" aria-labelledby="estancias-tit">
+    <div class="hoja-borde" aria-hidden="true"></div>
+    <div class="hoja-dentro">
+      <header class="hoja-cabeza">
+        <i class="punto" data-parada="3" aria-hidden="true"></i>
+        <p class="antetitulo"><span class="num">03</span> Las estancias</p>
+        <h2 class="titular" id="estancias-tit" data-partir>Dentro, la piedra se ve y la madera se toca.</h2>
+        <p class="aviso-ejemplo" role="note"><b>Fotografías de ejemplo.</b> Son de archivo (Pexels) y no retratan ninguna casa real; en la web de una casa de verdad van sus fotos.</p>
+      </header>
+      <div class="estancias">
+        <nav class="estancias-indice" aria-label="Estancias">
+          <ol>
+            <li><a href="#e-salon" data-estancia="e-salon">Salón de la lareira</a></li>
+            <li><a href="#e-cocina" data-estancia="e-cocina">Cocina</a></li>
+            <li><a href="#e-bacelo" data-estancia="e-bacelo">O Bacelo</a></li>
+            <li><a href="#e-lousa" data-estancia="e-lousa">A Lousa</a></li>
+            <li><a href="#e-solaina" data-estancia="e-solaina">A Solaina</a></li>
+            <li><a href="#e-faiado" data-estancia="e-faiado">O Faiado</a></li>
+            <li><a href="#e-banos" data-estancia="e-banos">Baños</a></li>
+          </ol>
+        </nav>
+        <div class="estancias-lista">
+          <article class="estancia" id="e-salon">
+            <header><p class="estancia-tipo">Zona común · planta alta</p><h3>Salón de la lareira</h3></header>
+            <p>La lareira, con la leña de castaño ya cortada, se enciende de octubre a mayo. Alrededor, la mesa larga, los libros de la casa y sitio para los ocho.</p>
+            <div class="fotos" data-n="1">
+              <figure class="foto"><picture><source type="image/webp" srcset="img/estancias/salon-800.webp 800w, img/estancias/salon-1600.webp 1600w" sizes="(min-width: 1000px) 60vw, 100vw"><img src="img/estancias/salon-1600.jpg" srcset="img/estancias/salon-800.jpg 800w, img/estancias/salon-1600.jpg 1600w" sizes="(min-width: 1000px) 60vw, 100vw" width="1600" height="1067" alt="Chimenea de ladrillo con leña apilada y repisa de madera" loading="lazy" decoding="async"></picture><figcaption>Foto de ejemplo</figcaption></figure>
+            </div>
+          </article>
+          <article class="estancia" id="e-cocina">
+            <header><p class="estancia-tipo">Zona común · planta baja</p><h3>Cocina</h3></header>
+            <p>Cocina de casa grande, con encimera de madera, fogón, horno, lavavajillas y cafetera de émbolo. Da al patio y al emparrado.</p>
+            <div class="fotos" data-n="1">
+              <figure class="foto"><picture><source type="image/webp" srcset="img/estancias/cocina-800.webp 800w, img/estancias/cocina-1600.webp 1600w" sizes="(min-width: 1000px) 60vw, 100vw"><img src="img/estancias/cocina-1600.jpg" srcset="img/estancias/cocina-800.jpg 800w, img/estancias/cocina-1600.jpg 1600w" sizes="(min-width: 1000px) 60vw, 100vw" width="1600" height="1067" alt="Cocina con encimera de madera, fogón, tetera y estantes con tarros" loading="lazy" decoding="async"></picture><figcaption>Foto de ejemplo</figcaption></figure>
+            </div>
+          </article>
+          <article class="estancia" id="e-bacelo">
+            <header><p class="estancia-tipo">Dormitorio doble · cama de 160</p><h3>O Bacelo</h3></header>
+            <p>El dormitorio grande, con la pared de piedra vista y la ventana al sur: por la mañana se ve el río desde la cama.</p>
+            <div class="fotos" data-n="1">
+              <figure class="foto"><picture><source type="image/webp" srcset="img/estancias/bacelo-800.webp 800w, img/estancias/bacelo-1600.webp 1600w" sizes="(min-width: 1000px) 60vw, 100vw"><img src="img/estancias/bacelo-1600.jpg" srcset="img/estancias/bacelo-800.jpg 800w, img/estancias/bacelo-1600.jpg 1600w" sizes="(min-width: 1000px) 60vw, 100vw" width="1600" height="1067" alt="Dormitorio con cama doble, cabecero de madera azul y pared de piedra vista" loading="lazy" decoding="async"></picture><figcaption>Foto de ejemplo</figcaption></figure>
+            </div>
+          </article>
+          <article class="estancia" id="e-lousa">
+            <header><p class="estancia-tipo">Dormitorio doble · cama de 150</p><h3>A Lousa</h3></header>
+            <p>Techo de madera, suelo de tarima y un ventanal grande a los árboles. Es el más fresco en verano: da al castañar.</p>
+            <div class="fotos" data-n="1">
+              <figure class="foto"><picture><source type="image/webp" srcset="img/estancias/lousa-800.webp 800w, img/estancias/lousa-1600.webp 1600w" sizes="(min-width: 1000px) 60vw, 100vw"><img src="img/estancias/lousa-1600.jpg" srcset="img/estancias/lousa-800.jpg 800w, img/estancias/lousa-1600.jpg 1600w" sizes="(min-width: 1000px) 60vw, 100vw" width="1600" height="1067" alt="Dormitorio con cama doble, butaca y ventanal a los árboles" loading="lazy" decoding="async"></picture><figcaption>Foto de ejemplo</figcaption></figure>
+            </div>
+          </article>
+          <article class="estancia" id="e-solaina">
+            <header><p class="estancia-tipo">Dormitorio · dos camas de 90</p><h3>A Solaina</h3></header>
+            <p>Sale al corredor de madera. Dos camas que se pueden juntar y una mesa para escribir mirando a la otra orilla.</p>
+            <div class="fotos" data-n="1">
+              <figure class="foto"><picture><source type="image/webp" srcset="img/estancias/solaina-800.webp 800w, img/estancias/solaina-1600.webp 1600w" sizes="(min-width: 1000px) 60vw, 100vw"><img src="img/estancias/solaina-1600.jpg" srcset="img/estancias/solaina-800.jpg 800w, img/estancias/solaina-1600.jpg 1600w" sizes="(min-width: 1000px) 60vw, 100vw" width="1600" height="1067" alt="Dormitorio de paredes de madera con dos camas individuales" loading="lazy" decoding="async"></picture><figcaption>Foto de ejemplo</figcaption></figure>
+            </div>
+          </article>
+          <article class="estancia" id="e-faiado">
+            <header><p class="estancia-tipo">Bajo cubierta · cama de 150</p><h3>O Faiado</h3></header>
+            <p>El desván de la casa, bajo el tejado de pizarra: techo inclinado de madera y un ventanuco al este que coge el primer sol.</p>
+            <div class="fotos" data-n="1">
+              <figure class="foto"><picture><source type="image/webp" srcset="img/estancias/faiado-800.webp 800w, img/estancias/faiado-1600.webp 1600w" sizes="(min-width: 1000px) 60vw, 100vw"><img src="img/estancias/faiado-1600.jpg" srcset="img/estancias/faiado-800.jpg 800w, img/estancias/faiado-1600.jpg 1600w" sizes="(min-width: 1000px) 60vw, 100vw" width="1600" height="1067" alt="Dormitorio abuhardillado con techo inclinado de madera y cama doble" loading="lazy" decoding="async"></picture><figcaption>Foto de ejemplo</figcaption></figure>
+            </div>
+          </article>
+          <article class="estancia" id="e-banos">
+            <header><p class="estancia-tipo"><span data-dato="banos">3</span> baños · uno con bañera</p><h3>Baños</h3></header>
+            <p>Uno en cada planta y otro dentro de O Bacelo; el de arriba, con bañera de patas. Toallas de algodón y agua caliente para todos a la vez.</p>
+            <div class="fotos" data-n="1">
+              <figure class="foto"><picture><source type="image/webp" srcset="img/estancias/bano-800.webp 800w, img/estancias/bano-1600.webp 1600w" sizes="(min-width: 1000px) 60vw, 100vw"><img src="img/estancias/bano-1600.jpg" srcset="img/estancias/bano-800.jpg 800w, img/estancias/bano-1600.jpg 1600w" sizes="(min-width: 1000px) 60vw, 100vw" width="1600" height="1067" alt="Baño claro con bañera de patas, lavabo de mueble y ventana" loading="lazy" decoding="async"></picture><figcaption>Foto de ejemplo</figcaption></figure>
+            </div>
+          </article>
+        </div>
+      </div>
+      <i class="punto punto--fin" data-parada="3" aria-hidden="true"></i>
+    </div>
+  </section>
+
+  <!-- ============ 04 · EL ENTORNO ============ -->
+  <section class="parada parada--entorno" id="entorno" aria-labelledby="entorno-tit">
+    <div class="pegado">
+      <div class="bloque-texto">
+        <i class="punto" data-parada="4" data-en=".5" aria-hidden="true"></i>
+        <p class="antetitulo"><span class="num">04</span> El entorno</p>
+        <h2 class="titular" id="entorno-tit" data-partir>El valle cambia cuatro veces al año.</h2>
+        <div class="estaciones" role="group" aria-label="Ver el valle en otra estación">
+          <button type="button" data-estacion="primavera" aria-pressed="false">Primavera</button>
+          <button type="button" data-estacion="verano" aria-pressed="false">Verano</button>
+          <button type="button" data-estacion="otono" aria-pressed="false">Otoño</button>
+          <button type="button" data-estacion="invierno" aria-pressed="false">Invierno</button>
+        </div>
+        <div class="estacion-texto" aria-live="polite">
+          <p data-texto="primavera" hidden>Brota la viña y el castañar se pone verde claro. Es la mejor época para andar los caminos de los bancales.</p>
+          <p data-texto="verano" hidden>Mediodías a la sombra del emparrado, el Sil en catamarán y cenas en el corredor, que de noche refresca.</p>
+          <p data-texto="otono" hidden>Vendimia a mano y en cesto por los bancales; la mencía se pone roja y en noviembre caen las castañas.</p>
+          <p data-texto="invierno" hidden>Niebla en el cañón por la mañana y la lareira por la tarde. Las cepas, podadas; el río, a la vista.</p>
+        </div>
+        <p class="nota-mundo">El color del valle y el recorrido del sol cambian con la estación que elijas.</p>
+        <ul class="cerca" aria-label="Qué hay cerca, en coche desde la casa">
+          <li><span class="cerca-que">Amandi, las viñas de la mencía</span><span class="cerca-cuanto">11 min · 6,7 km</span></li>
+          <li><span class="cerca-que">Doade</span><span class="cerca-cuanto">17 min · 10,5 km</span></li>
+          <li><span class="cerca-que">Miradoiro da Pena do Castelo</span><span class="cerca-cuanto">24 min · 13 km</span></li>
+          <li><span class="cerca-que">Monforte de Lemos</span><span class="cerca-cuanto">34 min · 24 km</span></li>
+          <li><span class="cerca-que">Parada de Sil, enfrente: se ve desde el patio, pero sin puente cerca son</span><span class="cerca-cuanto">1 h · 41 km</span></li>
+        </ul>
+        <p class="nota-fuente">Distancias por carretera desde el solar, calculadas con OpenStreetMap (OSRM).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · SERVICIOS Y NORMAS ============ -->
+  <section class="parada parada--servicios hoja hoja--lado" id="servicios" aria-labelledby="servicios-tit">
+    <div class="hoja-dentro">
+      <header class="hoja-cabeza">
+        <i class="punto" data-parada="5" aria-hidden="true"></i>
+        <p class="antetitulo"><span class="num">05</span> Servicios y normas</p>
+        <h2 class="titular" id="servicios-tit" data-partir>Lo que hay en la casa.</h2>
+      </header>
+      <dl class="ficha-cifras">
+        <div><dt>Plazas</dt><dd data-dato="plazas">8</dd></div>
+        <div><dt>Dormitorios</dt><dd data-dato="dormitorios">4</dd></div>
+        <div><dt>Camas</dt><dd data-dato="camas">5</dd></div>
+        <div><dt>Baños</dt><dd data-dato="banos">3</dd></div>
+      </dl>
+      <ul class="servicios">
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-lareira" width="28" height="28"/></svg><div><b>Lareira y leña</b><span>Leña de castaño cortada, en el alpendre.</span></div></li>
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-calor" width="28" height="28"/></svg><div><b>Calefacción</b><span>Radiadores en todas las estancias.</span></div></li>
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-wifi" width="28" height="28"/></svg><div><b>Wifi de fibra</b><span>En toda la casa y en el corredor.</span></div></li>
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-cocina" width="28" height="28"/></svg><div><b>Cocina completa</b><span>Horno, inducción, lavavajillas y menaje para doce.</span></div></li>
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-parrilla" width="28" height="28"/></svg><div><b>Parrilla de piedra</b><span>Bajo el emparrado, con mesa para ocho.</span></div></li>
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-coche" width="28" height="28"/></svg><div><b>Aparcamiento</b><span>Dentro del patio, para tres coches.</span></div></li>
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-lavadora" width="28" height="28"/></svg><div><b>Lavadora y tendal</b><span>En la bodega, con plancha.</span></div></li>
+        <li><svg width="28" height="28" aria-hidden="true" focusable="false"><use href="#i-cuna" width="28" height="28"/></svg><div><b>Cuna y trona</b><span>Para los más pequeños.</span></div></li>
+      </ul>
+      <div class="normas">
+        <h3>Cómo funciona la casa</h3>
+        <dl>
+          <div><dt>Entrada</dt><dd>Desde las <span data-dato="entrada">17:00</span></dd></div>
+          <div><dt>Salida</dt><dd>Hasta las <span data-dato="salida">12:00</span></dd></div>
+          <div><dt>Alquiler</dt><dd>La casa entera, para un solo grupo</dd></div>
+          <div><dt>Perros</dt><dd>Bienvenidos: el patio está cerrado</dd></div>
+          <div><dt>Fumar</dt><dd>En el patio y en el corredor</dd></div>
+          <div><dt>Llegada</dt><dd>Os esperamos en la casa con las llaves</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 · RESERVAR ============ -->
+  <section class="parada parada--reservar" id="reservar" aria-labelledby="reservar-tit">
+    <div class="reservar-dentro">
+      <header class="reservar-cabeza bloque-texto">
+        <i class="punto" data-parada="6" aria-hidden="true"></i>
+        <p class="antetitulo"><span class="num">06</span> Reservar</p>
+        <h2 class="titular" id="reservar-tit" data-partir>Elige las noches. La casa es para vosotros.</h2>
+        <p>Se reserva la casa entera, de <span data-dato="minNoches">2</span> noches en adelante.</p>
+        <address class="contacto">
+          <a href="tel:+34982000000" data-dato-href="telefonoEnlace" data-prefijo="tel:"><span data-dato="telefono">982 00 00 00</span></a>
+          <a href="mailto:reservas@ejemplo.com" data-dato-href="email" data-prefijo="mailto:"><span data-dato="email">reservas@ejemplo.com</span></a>
+          <span data-dato="direccion">Lugar da Corga, 4 · 27460 Sober (Lugo)</span>
+        </address>
+        <div class="mapa" id="mapa">
+          <button class="boton boton--claro mapa-boton" type="button" id="mapa-boton">Ver dónde está en Google Maps</button>
+          <p class="mapa-nota">Al pulsar se carga Google Maps (puede usar cookies de Google). Ubicación de ejemplo: un bancal de Sober.</p>
+        </div>
+      </header>
+
+      <div class="motor" id="motor" aria-labelledby="motor-tit">
+        <div class="motor-cabeza">
+          <h3 id="motor-tit">Fechas libres</h3>
+          <p class="sello-demo" role="note"><b>Demostración.</b> Las fechas ocupadas son de ejemplo y no se envía ni se cobra nada.</p>
+        </div>
+        <div class="motor-cal" id="motor-cal"></div>
+        <div class="motor-pie">
+          <label class="motor-personas">Personas
+            <select id="motor-personas"></select>
+          </label>
+          <div class="motor-resumen" id="motor-resumen" aria-live="polite"><p>Elige el día de llegada.</p></div>
+          <button class="boton boton--acento motor-pedir" id="motor-pedir" type="button" disabled>Solicitar la reserva</button>
+          <p class="motor-hecho" id="motor-hecho" hidden role="status"></p>
+          <p class="motor-supuestos">Supuestos de la demo: temporada alta en Semana Santa, del 1 de julio al 15 de septiembre y del 22 de diciembre al 6 de enero; mínimo de <span data-dato="minNoches">2</span> noches; precios de ejemplo.</p>
+        </div>
+        <noscript><p>Para reservar, llamad al 982 00 00 00 o escribid a reservas@ejemplo.com.</p></noscript>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie" id="pie">
+  <div class="pie-dentro">
+    <p class="pie-frase">La luz del corredor se queda encendida.</p>
+    <p class="pie-marca"><span data-dato="nombre">Casa da Corga</span> · <span data-dato="lugar">Sober · Ribeira Sacra</span></p>
+    <nav class="pie-legal" aria-label="Avisos legales">
+      <a href="aviso-legal.html">Aviso legal</a>
+      <a href="privacidad.html">Privacidad</a>
+      <a href="cookies.html">Cookies</a>
+      <a href="CREDITOS.md">Créditos</a>
+    </nav>
+    <p class="pie-ign">Relieve MDT05 y ortofoto PNOA © Instituto Geográfico Nacional (<a href="https://creativecommons.org/licenses/by/4.0/deed.es">CC BY 4.0</a>). Distancias: © colaboradores de OpenStreetMap.</p>
+    <p class="pie-demo"><b>Sitio de demostración.</b> <span data-dato="nombre">Casa da Corga</span> es un negocio ficticio; los datos, las fotografías y la historia son de muestra.</p>
+  </div>
+</footer>
+
+<!-- aviso de cookies -->
+<div class="cookies" id="cookies" role="region" aria-label="Aviso de cookies" hidden>
+  <p>Esta web no usa cookies propias de seguimiento. Guarda en tu navegador que has visto este aviso y, si lo pulsas, el mapa de Google carga las suyas. <a href="cookies.html">Más información</a>.</p>
+  <button class="boton boton--acento" id="cookies-ok" type="button">Entendido</button>
+</div>
+
+<!-- MANDO DE MAQUETA: no viaja al sitio de un cliente (ver README, «Quitar el mando») -->
+<div class="mando" id="mando" role="group" aria-label="Dos versiones de la misma web" hidden>
+  <p class="mando-tit">Versión</p>
+  <div class="mando-fila">
+    <button type="button" data-densidad="recorrido" aria-pressed="true">Recorrido</button>
+    <button type="button" data-densidad="sobria" aria-pressed="false">Sobria</button>
+  </div>
+  <p class="mando-tit">Color</p>
+  <div class="mando-fila">
+    <button type="button" data-paleta="mencia" aria-pressed="true">Mencía</button>
+    <button type="button" data-paleta="castano" aria-pressed="false">Castaño</button>
+    <button type="button" data-paleta="sil" aria-pressed="false">Sil</button>
+  </div>
+</div>
+<!-- la versión sobria añade los datos del viaje: parada y horas de sol de ese día -->
+<p class="diario" id="diario" aria-hidden="true"><span data-diario="tramo"></span><span data-diario="sol"></span></p>
+<!-- /MANDO DE MAQUETA -->
+
+<!-- cursor propio (solo ratón) -->
+<div class="cursor" aria-hidden="true"><span class="cursor-punto"></span><span class="cursor-aro"></span></div>
+
+<!-- iconos de servicios -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-lareira" viewBox="0 0 28 28"><path d="M4 25h20M6 25V9h16v16M9 25v-8a5 5 0 0 1 10 0v8M4 9h20V5H4zM14 22c-2-1.5-1.5-3.5 0-5 1.5 1.5 2 3.5 0 5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-calor" viewBox="0 0 28 28"><path d="M5 8v14M9 8v14M13 8v14M17 8v14M21 8v14M3 22h22M3 8h22M24 22v3M4 22v3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 28 28"><path d="M3 11a16 16 0 0 1 22 0M7 15a10 10 0 0 1 14 0M11 19a4.5 4.5 0 0 1 6 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="14" cy="22.5" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="i-cocina" viewBox="0 0 28 28"><path d="M5 12h18v8a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM3 12h22M10 9c0-2 2-2 2-4M15 9c0-2 2-2 2-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-parrilla" viewBox="0 0 28 28"><path d="M4 12h20M5 12l2 6h14l2-6M8 18l-2 7M20 18l2 7M9 9l1-3M14 9V5M19 9l-1-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-coche" viewBox="0 0 28 28"><path d="M4 18v-4l3-6h14l3 6v4zM4 18v3h3v-3M21 18v3h3v-3M6 14h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8.5" cy="16" r="1" fill="currentColor"/><circle cx="19.5" cy="16" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-lavadora" viewBox="0 0 28 28"><rect x="5" y="3" width="18" height="22" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="15" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 7h18M9 5h2" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-cuna" viewBox="0 0 28 28"><path d="M4 9v15M24 9v15M4 13h20M4 21h20M8 13v8M12 13v8M16 13v8M20 13v8M4 9a3 3 0 0 1 6 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+</svg>
+
+<script src="js/config.js?v=1"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js" defer></script>
+<script src="js/main.js?v=1" defer></script>
+<script src="js/reserva.js?v=1" defer></script>
+<script type="module" src="js/mundo/arranque.js?v=1"></script>
+</body>
+</html>
