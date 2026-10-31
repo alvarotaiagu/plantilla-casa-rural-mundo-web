@@ -46,10 +46,10 @@ function texturaCamino(THREE) {
   return t;
 }
 
-function copaGeo(THREE, semilla) {
+function copaGeo(THREE, semilla, detalle) {
   const r = azar(semilla), partes = [];
   for (const [x, y, z, s] of [[0, 0, 0, 1], [.7, -.25, .2, .72], [-.6, -.15, -.3, .78], [.1, .45, -.5, .66]]) {
-    const g = new THREE.IcosahedronGeometry(s, 1);
+    const g = new THREE.IcosahedronGeometry(s, detalle);
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { const k = 1 + (r() - .5) * .28; p.setXYZ(i, p.getX(i) * k + x, p.getY(i) * k * .86 + y, p.getZ(i) * k + z); }
     partes.push(g.index ? g.toNonIndexed() : g);
@@ -76,21 +76,32 @@ export function crearEntorno(THREE, { meta, alturaEn, movil, vidParra }) {
   };
 
   // ---------- árboles ----------
-  const lista = movil ? meta.arboles.filter((_, i) => i % 2 === 0) : meta.arboles;
-  const nA = lista.length;
-  const copa = new THREE.InstancedMesh(copaGeo(THREE, 5), encoger(new THREE.MeshStandardMaterial({ roughness: .95, flatShading: true }), uCopa), nA);
-  const tronco = new THREE.InstancedMesh(new THREE.CylinderGeometry(.12, .2, 1, 6).translate(0, .5, 0), new THREE.MeshStandardMaterial({ color: 0x4a3a2c, roughness: 1 }), nA);
+  // los de cerca de la casa (primero en la lista) con copa redonda y sombra;
+  // los ~3.700 del valle con copa sencilla y sin pasar por la sombra
+  const CERCA = 150;
+  const dCasa = a => Math.hypot(a[0], a[1]);
+  const todos = movil ? meta.arboles.filter((_, i) => i % 2 === 0) : meta.arboles;
+  const cerca = todos.filter(a => dCasa(a) < CERCA), lista = [...cerca, ...todos.filter(a => dCasa(a) >= CERCA)];
+  const nA = lista.length, nCerca = cerca.length;
+  const matCopa = encoger(new THREE.MeshStandardMaterial({ roughness: .95, flatShading: true }), uCopa);
+  const matTronco = new THREE.MeshStandardMaterial({ color: 0x4a3a2c, roughness: 1 });
+  const gTronco = new THREE.CylinderGeometry(.12, .2, 1, 6).translate(0, .5, 0);
+  const copaC = new THREE.InstancedMesh(copaGeo(THREE, 5, 1), matCopa, nCerca);
+  const troncoC = new THREE.InstancedMesh(gTronco, matTronco, nCerca);
+  const copaL = new THREE.InstancedMesh(copaGeo(THREE, 5, 0), matCopa, nA - nCerca);
+  const troncoL = new THREE.InstancedMesh(gTronco, matTronco, nA - nCerca);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color();
   const azarA = lista.map(() => [r(), r(), r()]);
   lista.forEach(([x, z, k], i) => {
     const y = alturaEn(x, z), alto = 7.5 * k, ancho = 3.1 * k;
+    const [tr, co, j] = i < nCerca ? [troncoC, copaC, i] : [troncoL, copaL, i - nCerca];
     q.setFromAxisAngle(v.set(0, 1, 0), azarA[i][0] * 6.28);
-    m4.compose(v.set(x, y - .2, z), q, s.set(1.2 * k, alto * .55, 1.2 * k)); tronco.setMatrixAt(i, m4);
-    m4.compose(v.set(x, y + alto * .62, z), q, s.set(ancho, ancho * (.85 + azarA[i][1] * .3), ancho)); copa.setMatrixAt(i, m4);
+    m4.compose(v.set(x, y - .2, z), q, s.set(1.2 * k, alto * .55, 1.2 * k)); tr.setMatrixAt(j, m4);
+    m4.compose(v.set(x, y + alto * .62, z), q, s.set(ancho, ancho * (.85 + azarA[i][1] * .3), ancho)); co.setMatrixAt(j, m4);
   });
-  copa.castShadow = tronco.castShadow = true;
-  copa.receiveShadow = true;
-  grupo.add(tronco, copa);
+  copaC.castShadow = troncoC.castShadow = true;
+  copaC.receiveShadow = copaL.receiveShadow = true;
+  grupo.add(troncoC, copaC, troncoL, copaL);
 
   // ---------- bancales: muros y cepas ----------
   const muroPos = [], muroUV = [], muroIdx = [];
@@ -172,7 +183,8 @@ export function crearEntorno(THREE, { meta, alturaEn, movil, vidParra }) {
     if (malla.instanceColor) malla.instanceColor.needsUpdate = true;
   }
   function estacion(est) {
-    pintar(copa, nA, COPA, i => azarA[i], est);
+    pintar(copaC, nCerca, COPA, i => azarA[i], est);
+    pintar(copaL, nA - nCerca, COPA, i => azarA[i + nCerca], est);
     pintar(cepa, nC, CEPA, i => [azarC[i][0], azarC[i][1], (azarC[i][0] * 7.3) % 1], est);
     if (vidParra) pintar(vidParra, vidParra.count, CEPA, i => [((i * .618) % 1), ((i * .311) % 1), ((i * .743) % 1)], est);
     uCopa.value = est === 'invierno' ? .62 : 1;

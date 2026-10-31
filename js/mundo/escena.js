@@ -22,7 +22,7 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   lienzo.setAttribute('aria-hidden', 'true');
   lienzo.addEventListener('webglcontextlost', e => { e.preventDefault(); dispatchEvent(new CustomEvent('corga:3d-perdido')); });
   const renderer = new THREE.WebGLRenderer({ canvas: lienzo, antialias: !movil, powerPreference: 'high-performance', alpha: false });
-  const DPR_MAX = movil ? 1.5 : 1.75;
+  const DPR_MAX = movil ? 1.25 : 1.5;
   let dpr = Math.min(DPR_MAX, devicePixelRatio || 1);
   renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -71,11 +71,10 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   T.comun.uEst.value.copy(est);
   entorno.estacion(estacion);
   let sobria = !!inicial.sobria;
-  let puntero = { x: 0, y: 0 }, punteroS = { x: 0, y: 0 };
   let explorando = false, controles = null, vuelta = 0;
   const poseVuelta = { p: new THREE.Vector3(), m: new THREE.Vector3() };
 
-  const pos = new THREE.Vector3(), mira = new THREE.Vector3(), tmp = new THREE.Vector3();
+  const pos = new THREE.Vector3(), mira = new THREE.Vector3();
   let ultimaLuz = '', ultimoMin = -1;
 
   function ponerHora(s) {
@@ -87,10 +86,12 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
     const L = cielo.poner(so, lu);
     T.comun.uCieloRefl.value.setRGB(...L.hor.map(v => v * .55), THREE.SRGBColorSpace);
     casaLuz.noche = L.noche;
-    if (Math.round(m) !== ultimoMin) { ultimoMin = Math.round(m); renderer.shadowMap.needsUpdate = true; }
+    if (Math.round(m) !== ultimoMin) { ultimoMin = Math.round(m); sombraPendiente = true; }
     document.documentElement.style.setProperty('--cielo-hor', css(L.hor));
   }
   const casaLuz = { noche: 0 };
+  // la sombra se rehace como mucho cada 4 fotogramas en movimiento, y siempre al pararse
+  let sombraPendiente = false, desdeSombra = 0;
 
   // ---------- tamaño (la barra del móvil no rehace el búfer) ----------
   let anchoV = 0, altoV = 0;
@@ -142,13 +143,6 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
       tCam += (tObj - tCam) * k;
       if (Math.abs(tObj - tCam) < 2e-6) tCam = tObj; else moviendo = true;
       riel.getPoint(tCam, pos); mirada.getPoint(tCam, mira);
-      // un poco de vida con el ratón (no en táctil)
-      punteroS.x += (puntero.x - punteroS.x) * k; punteroS.y += (puntero.y - punteroS.y) * k;
-      if (Math.abs(puntero.x - punteroS.x) + Math.abs(puntero.y - punteroS.y) > 1e-4) moviendo = true;
-      tmp.subVectors(mira, pos);
-      const d = tmp.length();
-      tmp.applyAxisAngle(camara.up, -punteroS.x * .035).normalize().multiplyScalar(d);
-      mira.copy(pos).add(tmp); mira.y += punteroS.y * d * .02;
       if (vuelta > 0) {   // de la exploración, de vuelta al riel
         vuelta = Math.max(0, vuelta - dt / 1.1);
         const f = suave(0, 1, vuelta);
@@ -172,15 +166,17 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
     const obra = sobria ? 1 : suave(1.06, 1.94, s);
     const dibujo = sobria ? 0 : suave(.55, 1.0, s) * (1 - suave(1.08, 1.5, s)) * .85;
     casa.poner({ obra, dibujo, noche: casaLuz.noche });
-    if (obra > 0 && obra < 1) renderer.shadowMap.needsUpdate = true;
+    if (obra > 0 && obra < 1) sombraPendiente = true;
+    desdeSombra++;
+    if (sombraPendiente && (desdeSombra >= 4 || !moviendo)) { renderer.shadowMap.needsUpdate = true; sombraPendiente = false; desdeSombra = 0; }
 
     const t0 = performance.now();
     renderer.render(escena, camara);
     if (primer) { primer = false; contenedor.classList.add('con-3d'); contenedor.dispatchEvent(new CustomEvent('corga:3d-listo', { bubbles: true })); }
-    // calidad automática: media de 45 fotogramas seguidos
+    // calidad automática: media de 30 fotogramas seguidos; por debajo de ~45 fps, baja un escalón
     if (moviendo) {
       tiempos.push(dt * 1000);
-      if (tiempos.length >= 45) { const media = tiempos.reduce((a, b) => a + b) / tiempos.length; tiempos.length = 0; if (media > 30 && escalon < 4) bajarCalidad(); }
+      if (tiempos.length >= 30) { const media = tiempos.reduce((a, b) => a + b) / tiempos.length; tiempos.length = 0; if (media > 22 && escalon < 4) bajarCalidad(); }
     }
     void t0;
     if (moviendo && !document.hidden) requestAnimationFrame(cuadro);
@@ -195,9 +191,7 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   });
   addEventListener('corga:densidad', e => { sobria = e.detail.sobria; pedir(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pedir(); });
-  if (matchMedia('(pointer: fine)').matches) {
-    addEventListener('pointermove', e => { if (explorando) return; puntero.x = e.clientX / innerWidth * 2 - 1; puntero.y = -(e.clientY / innerHeight * 2 - 1); pedir(); }, { passive: true });
-  }
+  // sin giro con el ratón: redibujaba todo el valle a cada movimiento y el cursor iba a tirones
 
   /** Exploración libre (tras el botón): girar y acercar alrededor de lo que se mira. */
   let deseado = false;
