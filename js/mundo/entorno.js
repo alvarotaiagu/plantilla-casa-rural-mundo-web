@@ -52,7 +52,7 @@ function copaGeo(THREE, semilla) {
     const g = new THREE.IcosahedronGeometry(s, 1);
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { const k = 1 + (r() - .5) * .28; p.setXYZ(i, p.getX(i) * k + x, p.getY(i) * k * .86 + y, p.getZ(i) * k + z); }
-    partes.push(g.toNonIndexed());
+    partes.push(g.index ? g.toNonIndexed() : g);
   }
   const n = partes.reduce((a, g) => a + g.attributes.position.count, 0);
   const pos = new Float32Array(n * 3); let o = 0;
