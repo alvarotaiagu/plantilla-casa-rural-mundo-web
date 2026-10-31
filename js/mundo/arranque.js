@@ -9,21 +9,12 @@
 import { iniciarPlanB } from './planb.js';
 import { rotulo, diaDe, horasDe, hhmm, ESTACION_HOY } from './sol.js';
 
-const VERSION = '6';
+const VERSION = '7';
 const raiz = document.documentElement;
 const mundo = document.getElementById('mundo');
 
 function hayWebGL2() {
   try { return !!document.createElement('canvas').getContext('webgl2'); } catch (e) { return false; }
-}
-/** Chrome sin aceleración por hardware pinta WebGL con la CPU (SwiftShader): el valle no va fluido */
-function sinTarjeta() {
-  try {
-    const gl = document.createElement('canvas').getContext('webgl2'), ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
-    const r = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : '';
-    gl && gl.getExtension('WEBGL_lose_context')?.loseContext();
-    return /swiftshader|llvmpipe|software|basic render/i.test(r);
-  } catch (e) { return false; }
 }
 const q = new URLSearchParams(location.search);
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -34,7 +25,6 @@ if (q.has('sin-3d')) motivo = 'pedido';
 else if (reducido) motivo = 'movimiento-reducido';
 else if (ahorro) motivo = 'ahorro-de-datos';
 else if (!hayWebGL2()) motivo = 'sin-webgl';
-else if (sinTarjeta()) motivo = 'sin-tarjeta-grafica';
 
 const planB = iniciarPlanB({ version: VERSION });
 window.CORGA = Object.assign(window.CORGA || {}, { mundo: { motivo, planB } });

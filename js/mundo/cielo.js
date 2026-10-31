@@ -75,6 +75,7 @@ export function crearCielo(THREE, { escena, renderer, movil }) {
   Object.assign(sol.shadow.camera, { left: -42, right: 42, top: 42, bottom: -42, near: 1, far: 900 });
   sol.shadow.camera.updateProjectionMatrix();
   sol.shadow.bias = -.0004; sol.shadow.normalBias = .04;
+  sol.shadow.camera.layers.enable(1);   // los árboles que solo dan sombra (entorno.js)
   // la sombra la rehace escena.js (renderer.shadowMap.needsUpdate) solo cuando cambia algo
   escena.add(sol, sol.target);
   const cielo = new THREE.HemisphereLight(0xbfd2e8, 0x4a4030, 1);

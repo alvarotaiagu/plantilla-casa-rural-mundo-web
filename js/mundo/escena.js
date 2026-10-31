@@ -71,10 +71,11 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   T.comun.uEst.value.copy(est);
   entorno.estacion(estacion);
   let sobria = !!inicial.sobria;
+  let puntero = { x: 0, y: 0 }, punteroS = { x: 0, y: 0 };
   let explorando = false, controles = null, vuelta = 0;
   const poseVuelta = { p: new THREE.Vector3(), m: new THREE.Vector3() };
 
-  const pos = new THREE.Vector3(), mira = new THREE.Vector3();
+  const pos = new THREE.Vector3(), mira = new THREE.Vector3(), tmp = new THREE.Vector3();
   let ultimaLuz = '', ultimoMin = -1;
 
   function ponerHora(s) {
@@ -143,6 +144,13 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
       tCam += (tObj - tCam) * k;
       if (Math.abs(tObj - tCam) < 2e-6) tCam = tObj; else moviendo = true;
       riel.getPoint(tCam, pos); mirada.getPoint(tCam, mira);
+      // un poco de vida con el ratón (no en táctil)
+      punteroS.x += (puntero.x - punteroS.x) * k; punteroS.y += (puntero.y - punteroS.y) * k;
+      if (Math.abs(puntero.x - punteroS.x) + Math.abs(puntero.y - punteroS.y) > 1e-4) moviendo = true;
+      tmp.subVectors(mira, pos);
+      const d = tmp.length();
+      tmp.applyAxisAngle(camara.up, -punteroS.x * .035).normalize().multiplyScalar(d);
+      mira.copy(pos).add(tmp); mira.y += punteroS.y * d * .02;
       if (vuelta > 0) {   // de la exploración, de vuelta al riel
         vuelta = Math.max(0, vuelta - dt / 1.1);
         const f = suave(0, 1, vuelta);
@@ -191,7 +199,9 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   });
   addEventListener('corga:densidad', e => { sobria = e.detail.sobria; pedir(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pedir(); });
-  // sin giro con el ratón: redibujaba todo el valle a cada movimiento y el cursor iba a tirones
+  if (matchMedia('(pointer: fine)').matches) {
+    addEventListener('pointermove', e => { if (explorando) return; puntero.x = e.clientX / innerWidth * 2 - 1; puntero.y = -(e.clientY / innerHeight * 2 - 1); pedir(); }, { passive: true });
+  }
 
   /** Exploración libre (tras el botón): girar y acercar alrededor de lo que se mira. */
   let deseado = false;
