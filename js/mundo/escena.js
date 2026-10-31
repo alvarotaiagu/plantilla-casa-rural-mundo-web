@@ -75,7 +75,7 @@ export async function crearMundo({ contenedor, movil, ligera = false, version, b
   let explorando = false, controles = null, vuelta = 0;
   const poseVuelta = { p: new THREE.Vector3(), m: new THREE.Vector3() };
 
-  const pos = new THREE.Vector3(), mira = new THREE.Vector3(), tmp = new THREE.Vector3();
+  const pos = new THREE.Vector3(), mira = new THREE.Vector3();
   let ultimaLuz = '', ultimoMin = -1;
 
   function ponerHora(s) {
@@ -144,13 +144,6 @@ export async function crearMundo({ contenedor, movil, ligera = false, version, b
       tCam += (tObj - tCam) * k;
       if (Math.abs(tObj - tCam) < 2e-6) tCam = tObj; else moviendo = true;
       riel.getPoint(tCam, pos); mirada.getPoint(tCam, mira);
-      // un poco de vida con el ratón (no en táctil)
-      punteroS.x += (puntero.x - punteroS.x) * k; punteroS.y += (puntero.y - punteroS.y) * k;
-      if (Math.abs(puntero.x - punteroS.x) + Math.abs(puntero.y - punteroS.y) > 1e-4) moviendo = true;
-      tmp.subVectors(mira, pos);
-      const d = tmp.length();
-      tmp.applyAxisAngle(camara.up, -punteroS.x * .035).normalize().multiplyScalar(d);
-      mira.copy(pos).add(tmp); mira.y += punteroS.y * d * .02;
       if (vuelta > 0) {   // de la exploración, de vuelta al riel
         vuelta = Math.max(0, vuelta - dt / 1.1);
         const f = suave(0, 1, vuelta);
@@ -199,9 +192,22 @@ export async function crearMundo({ contenedor, movil, ligera = false, version, b
   });
   addEventListener('corga:densidad', e => { sobria = e.detail.sobria; pedir(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) pedir(); });
-  // en ?ligera no: redibuja todo el valle a cada movimiento y el cursor va al ritmo del 3D
-  if (!ligera && matchMedia('(pointer: fine)').matches) {
-    addEventListener('pointermove', e => { if (explorando) return; puntero.x = e.clientX / innerWidth * 2 - 1; puntero.y = -(e.clientY / innerHeight * 2 - 1); pedir(); }, { passive: true });
+  // un poco de vida con el ratón (no en táctil; en ?ligera, nada): se mueve con CSS la imagen
+  // ya pintada, un 6 % más grande para que no asomen los bordes. No redibuja el valle,
+  // así que el cursor no espera al 3D.
+  let vidaViva = false, vidaUltimo = 0;
+  function vida(ahora) {
+    const k = 1 - Math.exp(-Math.min(.1, (ahora - vidaUltimo) / 1000) * 3.4); vidaUltimo = ahora;
+    punteroS.x += (puntero.x - punteroS.x) * k; punteroS.y += (puntero.y - punteroS.y) * k;
+    lienzo.style.transform = explorando ? 'none' : `translate3d(${(-punteroS.x * 2.4).toFixed(3)}%, ${(punteroS.y * 1.5).toFixed(3)}%, 0) scale(1.06)`;
+    if (!explorando && Math.abs(puntero.x - punteroS.x) + Math.abs(puntero.y - punteroS.y) > 1e-3) requestAnimationFrame(vida);
+    else vidaViva = false;
+  }
+  function moverVida() { if (!vidaViva) { vidaViva = true; vidaUltimo = performance.now(); requestAnimationFrame(vida); } }
+  const conVida = !ligera && matchMedia('(pointer: fine)').matches;
+  if (conVida) {
+    lienzo.style.transform = 'scale(1.06)';
+    addEventListener('pointermove', e => { if (explorando) return; puntero.x = e.clientX / innerWidth * 2 - 1; puntero.y = -(e.clientY / innerHeight * 2 - 1); moverVida(); }, { passive: true });
   }
 
   /** Exploración libre (tras el botón): girar y acercar alrededor de lo que se mira. */
@@ -220,11 +226,13 @@ export async function crearMundo({ contenedor, movil, ligera = false, version, b
       controles.enabled = true;
       explorando = true;
       lienzo.classList.add('explorando');
+      if (conVida) lienzo.style.transform = 'none';   // girar con el ratón sobre la imagen sin mover
     } else {
       poseVuelta.p.copy(camara.position); poseVuelta.m.copy(controles.target);
       controles.enabled = false;
       explorando = false; vuelta = 1;
       lienzo.classList.remove('explorando');
+      if (conVida) moverVida();
     }
     pedir();
   }
