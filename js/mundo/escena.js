@@ -109,9 +109,9 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   new ResizeObserver(() => medir(false)).observe(contenedor);
 
   // ---------- bucle (solo cuando hace falta) ----------
-  let vivo = false, ultimo = 0, primer = true, sombras = true;
+  let vivo = false, ultimo = 0, primer = true, sombras = true, roto = false;
   const tiempos = []; let escalon = 0;
-  function pedir() { if (!vivo && !document.hidden) { vivo = true; ultimo = performance.now(); requestAnimationFrame(cuadro); } }
+  function pedir() { if (!roto && !vivo && !document.hidden) { vivo = true; ultimo = performance.now(); requestAnimationFrame(cuadro); } }
   function bajarCalidad() {
     escalon++;
     if (escalon === 1 && dpr > 1) { dpr = Math.max(1, dpr - .25); renderer.setPixelRatio(dpr); medir(true); }
@@ -122,6 +122,14 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
   }
 
   function cuadro(ahora) {
+    try { fotograma(ahora); }
+    catch (err) {
+      vivo = false; roto = true;
+      console.error('El 3D ha fallado al pintar; vuelve el plan B.', err);
+      dispatchEvent(new CustomEvent('corga:3d-perdido'));
+    }
+  }
+  function fotograma(ahora) {
     const dt = Math.min(.1, (ahora - ultimo) / 1000); ultimo = ahora;
     let moviendo = false;
 
@@ -155,7 +163,8 @@ export async function crearMundo({ contenedor, movil, version, base = 'img/terre
     cielo.cupula.position.copy(camara.position);
 
     // estación (fundido)
-    if (est.distanceToSquared(estObj) > 1e-5) { est.lerp(estObj, 1 - Math.exp(-dt * 4)); T.comun.uEst.value.copy(est); moviendo = true; }
+    const dEst = Math.abs(est.x - estObj.x) + Math.abs(est.y - estObj.y) + Math.abs(est.z - estObj.z) + Math.abs(est.w - estObj.w);
+    if (dEst > 1e-3) { est.lerp(estObj, 1 - Math.exp(-dt * 4)); T.comun.uEst.value.copy(est); moviendo = true; }
     else if (!est.equals(estObj)) { est.copy(estObj); T.comun.uEst.value.copy(est); }
 
     const s = explorando ? sObj : sDeT(tCam);

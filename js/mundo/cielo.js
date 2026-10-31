@@ -73,6 +73,7 @@ export function crearCielo(THREE, { escena, renderer, movil }) {
   sol.castShadow = true;
   sol.shadow.mapSize.set(movil ? 1024 : 2048, movil ? 1024 : 2048);
   Object.assign(sol.shadow.camera, { left: -42, right: 42, top: 42, bottom: -42, near: 1, far: 900 });
+  sol.shadow.camera.updateProjectionMatrix();
   sol.shadow.bias = -.0004; sol.shadow.normalBias = .04;
   // la sombra la rehace escena.js (renderer.shadowMap.needsUpdate) solo cuando cambia algo
   escena.add(sol, sol.target);

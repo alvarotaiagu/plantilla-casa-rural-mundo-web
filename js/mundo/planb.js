@@ -55,7 +55,8 @@ export function iniciarPlanB({ version }) {
   }).catch(() => { /* sin horizonte: queda el degradado del CSS */ });
 
   function pintar() {
-    if (!listo || raiz.classList.contains('con-3d')) return;
+    // se pinta hasta que el 3D enseña su primer fotograma (no basta con que haya cargado)
+    if (!listo || caja.parentElement.classList.contains('con-3d')) return;
     const dia = diaDe(estacion), m = minutoDe(s, dia), f = instante(dia, m), so = sol(f), lu = luna(f), L = luz(so.alt);
     const base = TIERRA[estacion], k = Math.min(1, .16 + L.i / 3.2 * .84);
     const tierra = mezcla(base.map(v => v * k), L.hs, .25);
